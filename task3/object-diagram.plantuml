@@ -1,0 +1,72 @@
+@startuml
+skinparam backgroundColor White
+skinparam BorderColor Black
+skinparam ArrowColor Black
+skinparam object {
+  BackgroundColor White
+  BorderColor Black
+  FontColor Black
+}
+skinparam linetype ortho
+
+object "customer1 : Customer" as c1 {
+  id = 101
+  name = "Иван Петров"
+  email = "ivan@example.com"
+  phone = "+7-999-000-00-00"
+  status = "Active"
+}
+
+object "order1 : Order" as o1 {
+  id = 5001
+  createdAt = "2026-04-10 12:30:00"
+  totalAmount = 1500.00
+  status = "Cooking"
+  deliveryAddress = "ул. Ленина, д. 10, кв. 5"
+}
+
+object "item1 : OrderItem" as i1 {
+  id = 1001
+  quantity = 2
+  priceAtMoment = 500.00
+}
+
+object "burger1 : MenuItem" as m1 {
+  id = 20
+  name = "Чизбургер"
+  description = "Сочная говядина с сыром"
+  price = 500.00
+  category = "Бургеры"
+}
+
+object "pay1 : Payment" as p1 {
+  id = 900
+  amount = 1500.00
+  method = "Card"
+  status = "Success"
+  transactionId = "TXN12345678"
+  timestamp = "2026-04-10 12:31:00"
+}
+
+object "courier1 : Courier" as d1 {
+  id = 303
+  name = "Алексей Смирнов"
+  phone = "+7-999-111-22-33"
+  status = "OnDelivery"
+  currentLocation = "55.751, 37.617"
+}
+
+object "restaurant1 : Restaurant" as r1 {
+  id = 50
+  name = "Burger House"
+  address = "ул. Пушкина, д. 5"
+}
+
+c1 --> o1 : places
+o1 --> i1 : contains
+i1 --> m1 : references
+o1 --> p1 : paid by
+o1 --> d1 : assigned to
+o1 --> r1 : from restaurant
+
+@enduml
