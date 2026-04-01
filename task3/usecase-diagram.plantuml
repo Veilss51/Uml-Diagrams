@@ -1,0 +1,71 @@
+@startuml
+skinparam backgroundColor White
+skinparam BorderColor Black
+skinparam ArrowColor Black
+skinparam usecase {
+  BackgroundColor White
+  BorderColor Black
+  FontColor Black
+}
+skinparam actor {
+  BackgroundColor White
+  BorderColor Black
+  FontColor Black
+}
+skinparam package {
+  BackgroundColor White
+  BorderColor Black
+}
+
+left to right direction
+
+actor "Гость" as Guest
+actor "Customer" as User
+actor "Курьер" as Courier
+actor "Администратор" as Admin
+
+package "FoodFast System" {
+  usecase "Просмотреть меню" as UC1
+  usecase "Зарегистрироваться" as UC2
+  usecase "Войти в систему" as UC3
+  usecase "Оформить заказ" as UC4
+  usecase "Оплатить заказ" as UC5
+  usecase "Отследить доставку" as UC6
+  usecase "Оставить отзыв" as UC7
+  usecase "Просмотреть профиль" as UC8
+  usecase "Принять заказ" as UC9
+  usecase "Обновить местоположение" as UC10
+  usecase "Подтвердить доставку" as UC11
+  usecase "Просмотреть всех пользователей" as UC12
+  usecase "Управлять меню" as UC13
+  usecase "Разрешить споры" as UC14
+}
+
+' Гость
+Guest --> UC1
+Guest --> UC2
+Guest --> UC3
+
+' Customer
+User --> UC3
+User --> UC4
+User --> UC6
+User --> UC7
+User --> UC8
+
+' Курьер
+Courier --> UC9
+Courier --> UC10
+Courier --> UC11
+
+' Администратор
+Admin --> UC12
+Admin --> UC13
+Admin --> UC14
+
+' Включения и расширения
+UC4 ..> UC5 : <<include>>
+UC6 ..> UC8 : <<extend>>
+UC2 ..> UC3 : <<include>>
+
+@enduml
