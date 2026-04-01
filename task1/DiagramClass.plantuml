@@ -1,0 +1,123 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+
+abstract class User {
+    +id: int
+    +name: string
+    +email: string
+    +phone: string
+    +passwordHash: string
+    +login(): boolean
+    +logout(): void
+    +updateProfile(): void
+    +viewOrderHistory(): List<Order>
+}
+
+class Guest {
+    +browseMenu(): List<MenuItem>
+    +register(): Customer
+}
+
+class Customer {
+    +placeOrder(): Order
+    +trackDelivery(): Location
+    +addReview(): Review
+    +applyPromoCode(): boolean
+}
+
+class Courier {
+    +acceptDelivery(): boolean
+    +updateLocation(): void
+    +confirmDelivery(): void
+    +setAvailability(): void
+}
+
+class RestaurantManager {
+    +confirmOrder(): void
+    +updateMenu(): void
+    +changeOrderStatus(): void
+    +viewDailyStats(): Report
+}
+
+class Administrator {
+    +manageUsers(): void
+    +resolveDisputes(): void
+    +configureFees(): void
+    +viewSystemLogs(): List<Log>
+}
+
+class Order {
+    +id: int
+    +createdAt: DateTime
+    +totalAmount: decimal
+    +status: OrderStatus
+    +deliveryAddress: string
+    +calculateTotal(): decimal
+    +cancel(): void
+}
+
+class OrderItem {
+    +quantity: int
+    +priceAtMoment: decimal
+    +getSubtotal(): decimal
+}
+
+class MenuItem {
+    +id: int
+    +name: string
+    +description: string
+    +price: decimal
+    +category: string
+    +isAvailable: boolean
+}
+
+class Payment {
+    +id: int
+    +amount: decimal
+    +method: PaymentMethod
+    +transactionId: string
+    +status: PaymentStatus
+    +process(): boolean
+    +refund(): void
+}
+
+class DeliveryRoute {
+    +id: int
+    +startPoint: string
+    +endPoint: string
+    +estimatedTime: int
+    +currentLocation: GeoLocation
+    +optimizeRoute(): void
+}
+
+class Review {
+    +id: int
+    +rating: int
+    +comment: string
+    +timestamp: DateTime
+}
+
+' Relationships
+User <|-- Guest
+User <|-- Customer
+User <|-- Courier
+User <|-- RestaurantManager
+User <|-- Administrator
+
+Order "1" *-- "0..*" OrderItem : composition
+Order "0..*" o-- "1..*" MenuItem : aggregation
+
+Customer "1" --> "0..*" Order : places
+Order "1" --> "1" RestaurantManager : handled by
+Order "1" --> "1" Payment : paid via
+DeliveryRoute "1" --> "1" Courier : assigned to
+Order "1" --> "0..1" DeliveryRoute : has route
+Order "1" --> "0..1" Review : receives
+Customer "1" --> "0..*" Review : writes
+
+Guest ..> Customer : registers as
+Customer ..> Payment : initiates
+Order ..> DeliveryRoute : triggers creation
+
+@enduml
