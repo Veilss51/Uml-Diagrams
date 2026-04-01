@@ -1,0 +1,81 @@
+@startuml
+skinparam sequence {
+  LifeLineBorderColor #3498DB
+  LifeLineBackgroundColor #EBF5FB
+  ArrowColor #2E86C1
+}
+
+actor Customer as C
+participant "Order\nController" as OC
+participant "Payment\nService" as PS
+participant "Restaurant\nSystem" as RS
+participant "Courier\nService" as CS
+participant "Notification\nService" as NS
+
+C -> OC: placeOrder(cart, address)
+activate OC
+
+OC -> OC: validateOrder()
+OC -> PS: processPayment(amount, method)
+activate PS
+
+alt Оплата успешна
+  PS --> OC: paymentSuccess(transactionId)
+  deactivate PS
+  
+  OC -> RS: confirmOrder(restaurantId, items)
+  activate RS
+  
+  alt Ресторан подтверждает
+    RS --> OC: orderConfirmed(prepTime)
+    deactivate RS
+    
+    OC -> CS: assignCourier(location, restaurant)
+    activate CS
+    
+    CS --> OC: courierAssigned(courierId, eta)
+    deactivate CS
+    
+    OC -> NS: sendConfirmation(customerId, orderId)
+    activate NS
+    NS --> C: orderConfirmedSMS()
+    deactivate NS
+    
+    OC --> C: orderDetails(trackingNumber)
+  else Ресторан отклоняет
+    RS --> OC: orderDeclined(reason)
+    deactivate RS
+    
+    OC -> PS: refundPayment(transactionId)
+    activate PS
+    PS --> OC: refundSuccess()
+    deactivate PS
+    
+    OC -> NS: sendCancellation(customerId)
+    activate NS
+    NS --> C: orderCancelledSMS()
+    deactivate NS
+    
+    OC --> C: orderDeclined(reason)
+  end
+else Оплата неудачна
+  PS --> OC: paymentFailed(errorCode)
+  deactivate PS
+  
+  OC -> NS: sendPaymentError(customerId)
+  activate NS
+  NS --> C: paymentFailedSMS()
+  deactivate NS
+  
+  OC --> C: paymentError(errorCode)
+end
+
+deactivate OC
+
+opt Доставка задерживается
+  CS -> OC: notifyDelay(newEta)
+  OC -> NS: sendDelayNotification(customerId, bonus)
+  NS --> C: delayCompensationSMS()
+end
+
+@enduml

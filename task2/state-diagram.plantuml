@@ -1,0 +1,51 @@
+@startuml
+skinparam state {
+  BackgroundColor #FEF9E7
+  BorderColor #F39C12
+  FontColor #2C3E50
+  FontSize 12
+}
+skinparam transition {
+  Color #E67E22
+}
+
+[*] --> Created
+
+Created --> PaymentPending : initiatePayment()
+PaymentPending --> Confirmed : confirmPayment()
+PaymentPending --> Cancelled : paymentFailed()
+
+Confirmed --> Cooking : restaurantConfirm()
+Confirmed --> Cancelled : userCancel()
+
+Cooking --> ReadyForPickup : markReady()
+Cooking --> Cancelled : restaurantCancel()
+
+ReadyForPickup --> OnDelivery : courierPickup()
+ReadyForPickup --> Cancelled : timeout()
+
+OnDelivery --> Delivered : confirmDelivery()
+OnDelivery --> Cancelled : deliveryFailed()
+
+Delivered --> Completed : addReview()
+Delivered --> Completed : autoComplete(24h)
+
+Cancelled --> [*]
+Completed --> [*]
+
+note right of Cooking
+  Время приготовления:
+  20-40 минут
+end note
+
+note right of OnDelivery
+  Отслеживание:
+  GPS-трекинг курьера
+end note
+
+note right of Delivered
+  Отзыв доступен:
+  в течение 7 дней
+end note
+
+@enduml
