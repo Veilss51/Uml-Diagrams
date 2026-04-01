@@ -1,0 +1,90 @@
+@startuml
+skinparam backgroundColor White
+skinparam BorderColor Black
+skinparam ArrowColor Black
+skinparam node {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam artifact {
+  BackgroundColor #F0F0F0
+  BorderColor Black
+  FontColor Black
+}
+skinparam database {
+  BackgroundColor White
+  BorderColor Black
+}
+
+' Клиентское устройство
+node "Смартфон клиента (iOS/Android)" as ClientDevice {
+  artifact "FoodFast App v1.2" as AppArtifact {
+    folder "assets" {
+      [images]
+      [config.json]
+    }
+  }
+}
+
+node "Браузер пользователя (PC)" as Browser {
+  artifact "Web Client Bundle" as WebArtifact {
+    [index.html]
+    [main.js]
+    [styles.css]
+  }
+}
+
+' Сервер приложений
+node "App Server Cluster (AWS EC2 / Docker)" as AppServer {
+  node "Nginx Load Balancer" {
+    artifact "nginx.conf"
+  }
+  
+  node "Container: Order Service" {
+    artifact "order-service.jar"
+  }
+  
+  node "Container: Payment Service" {
+    artifact "payment-service.py"
+    artifact "requirements.txt"
+  }
+  
+  node "Container: Delivery Service" {
+    artifact "delivery-service.jar"
+  }
+}
+
+' Сервер данных
+node "Database Server (Managed DB)" as DBServer {
+  database "PostgreSQL Cluster" as MainDB {
+    artifact "database_schema.sql"
+    artifact "backup_script.sh"
+  }
+  database "Redis Cache" as CacheDB {
+    artifact "cache_config.conf"
+  }
+}
+
+' Внешние системы
+node "External Services" as External {
+  artifact "Payment Gateway API"
+  artifact "Google Maps API"
+}
+
+' Физические соединения
+ClientDevice -[hidden]-> Browser
+AppArtifact ..> AppServer : HTTPS (443)
+WebArtifact ..> AppServer : HTTPS (443)
+
+AppServer ..> MainDB : JDBC (5432)
+AppServer ..> CacheDB : TCP (6379)
+
+AppServer ..> External : REST API (HTTPS)
+
+note right of AppServer
+  Масштабирование:
+  Автоматическое добавление
+  контейнеров при нагрузке > 80%
+end note
+
+@enduml
