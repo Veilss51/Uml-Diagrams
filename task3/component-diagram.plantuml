@@ -1,0 +1,56 @@
+@startuml
+skinparam backgroundColor White
+skinparam BorderColor Black
+skinparam ArrowColor Black
+skinparam component {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam database {
+  BackgroundColor White
+  BorderColor Black
+}
+
+package "Клиентский слой" {
+  [Mobile App] as App
+  [Web Client] as Web
+}
+
+package "API Gateway" {
+  [REST API Gateway] as Gateway
+}
+
+package "Серверный слой (Микросервисы)" {
+  component "Order Service" as OrderSvc
+  component "Payment Service" as PaySvc
+  component "Delivery Service" as DelSvc
+  component "User Service" as UserSvc
+}
+
+package "Слой данных" {
+  database "PostgreSQL DB" as DB
+  database "Redis Cache" as Cache
+}
+
+package "Внешние сервисы" {
+  [Payment Gateway] as ExtPay
+  [Maps API] as Maps
+}
+
+App --> Gateway
+Web --> Gateway
+
+Gateway --> OrderSvc
+Gateway --> PaySvc
+Gateway --> DelSvc
+Gateway --> UserSvc
+
+OrderSvc --> PaySvc
+OrderSvc --> DelSvc
+OrderSvc --> DB
+PaySvc --> ExtPay
+DelSvc --> Maps
+UserSvc --> DB
+UserSvc --> Cache
+
+@enduml
