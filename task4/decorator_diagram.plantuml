@@ -1,0 +1,81 @@
+@startuml
+skinparam backgroundColor White
+skinparam BorderColor Black
+skinparam ArrowColor Black
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+  FontColor Black
+}
+
+abstract class "Order" as Order {
+  +id: int
+  +createdAt: DateTime
+  +totalAmount: decimal
+  +status: string
+  +calculateTotal(): decimal
+  +cancel(): void
+}
+
+class "DeliveryOrder" as DO {
+  +deliveryAddress: string
+  +estimatedTime: int
+  +courierId: int
+  +calculateTotal(): decimal
+}
+
+class "PickupOrder" as PO {
+  +pickupLocation: string
+  +pickupTime: DateTime
+  +calculateTotal(): decimal
+}
+
+abstract class "OrderDecorator" as OD {
+  #wrappedOrder: Order
+  +calculateTotal(): decimal
+  +cancel(): void
+  +getDescription(): string
+}
+
+class "PriorityOrderDecorator" as POD {
+  -priorityLevel: int
+  -extraFee: decimal
+  +calculateTotal(): decimal
+  +isPriority(): boolean
+  +getDescription(): string
+}
+
+class "PromoOrderDecorator" as PROMOD {
+  -promoCode: string
+  -discountPercent: int
+  +calculateTotal(): decimal
+  +applyDiscount(): decimal
+  +getDescription(): string
+}
+
+Order <|-- DO
+Order <|-- PO
+
+OD o-- Order : decorates
+OD <|-- POD
+OD <|-- PROMOD
+
+note right of OD
+  Абстрактный декоратор
+  Хранит ссылку на Order
+  и делегирует вызовы
+end note
+
+note right of POD
+  Добавляет приоритет
+  Дополнительная плата
+  Ускоренная доставка
+end note
+
+note right of PROMOD
+  Добавляет промокоды
+  Скидки от суммы
+  Ограничения по времени
+end note
+
+@enduml

@@ -1,0 +1,88 @@
+@startuml
+skinparam backgroundColor White
+skinparam BorderColor Black
+skinparam ArrowColor Black
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+  FontColor Black
+}
+
+abstract class "User" as User {
+  +id: int
+  +name: string
+  +email: string
+  +phone: string
+  +login(): boolean
+  +logout(): void
+  #_createOrder(): Order
+  +placeNewOrder(): Order
+}
+
+class "RegisteredUser" as RU {
+  +registrationDate: DateTime
+  +orderHistory: List<Order>
+  #_createOrder(): Order
+}
+
+class "RegularUser" as RegU {
+  +loyaltyPoints: int
+  #_createOrder(): Order
+}
+
+class "PremiumUser" as PU {
+  +subscriptionExpiry: DateTime
+  +freeDeliveries: int
+  #_createOrder(): Order
+}
+
+class "Guest" as Guest {
+  +sessionId: string
+  +browseMenu(): List<MenuItem>
+  +register(): RegisteredUser
+}
+
+abstract class "Order" as Order {
+  +id: int
+  +totalAmount: decimal
+  +status: string
+  +calculateTotal(): decimal
+}
+
+class "DeliveryOrder" as DO {
+  +deliveryAddress: string
+  +deliveryFee: decimal
+}
+
+class "PickupOrder" as PO {
+  +pickupLocation: string
+  +pickupTime: DateTime
+}
+
+User <|-- RegisteredUser
+RegisteredUser <|-- RegularUser
+RegisteredUser <|-- PremiumUser
+
+User ..> Order : creates
+Order <|-- DO
+Order <|-- PO
+
+note right of RegU
+  Создаёт стандартные заказы
+  Обычная стоимость доставки
+  Накопление баллов
+end note
+
+note right of PU
+  Создаёт заказы со скидками
+  Бесплатная доставка
+  Приоритетная обработка
+end note
+
+note left of User
+  Фабричный метод _createOrder()
+  Переопределяется в подклассах
+  для создания разных типов заказов
+end note
+
+@enduml

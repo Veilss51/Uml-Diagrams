@@ -1,0 +1,85 @@
+@startuml
+skinparam backgroundColor White
+skinparam BorderColor Black
+skinparam ArrowColor Black
+skinparam class {
+  BackgroundColor White
+  BorderColor Black
+  FontColor Black
+}
+
+interface "Observer" as Observer {
+  +update(status: OrderStatus): void
+}
+
+class "OrderStatus" as OS {
+  -observers: List<Observer>
+  -orderId: int
+  -currentStatus: string
+  -lastUpdated: DateTime
+  +attach(observer: Observer): void
+  +detach(observer: Observer): void
+  +notify(): void
+  +updateStatus(newStatus: string): void
+  +getStatus(): string
+}
+
+class "NotificationService" as NS {
+  -notificationQueue: List<Notification>
+  +update(status: OrderStatus): void
+  -sendPush(userId: int, message: string): void
+  -sendSMS(phone: string, message: string): void
+}
+
+class "AnalyticsService" as AS {
+  -statistics: Map<String, Object>
+  +update(status: OrderStatus): void
+  -logStatusChange(orderId: int, status: string): void
+  -updateDeliveryMetrics(): void
+}
+
+class "CourierDispatcher" as CD {
+  -activeCouriers: List<Courier>
+  +update(status: OrderStatus): void
+  -reassignOrder(orderId: int): void
+  -notifyCourier(courierId: int): void
+}
+
+class "Order" as Order {
+  +id: int
+  +totalAmount: decimal
+  +status: string
+}
+
+Observer <|-- NS
+Observer <|-- AS
+Observer <|-- CD
+
+OS o-- Observer : notifies
+OS ..> Order : tracks
+
+note right of NS
+  Отправляет уведомления
+  Push/SMS/Email
+  Обновление статуса
+end note
+
+note right of AS
+  Собирает статистику
+  Время доставки
+  Анализ эффективности
+end note
+
+note right of CD
+  Перераспределяет заказы
+  Назначает курьеров
+  Оптимизация маршрутов
+end note
+
+note left of OS
+  Субъект (Subject)
+  Хранит список наблюдателей
+  Уведомляет при изменении статуса
+end note
+
+@enduml
