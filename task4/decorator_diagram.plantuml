@@ -8,74 +8,94 @@ skinparam class {
   FontColor Black
 }
 
-abstract class "Order" as Order {
-  +id: int
-  +createdAt: DateTime
-  +totalAmount: decimal
-  +status: string
-  +calculateTotal(): decimal
-  +cancel(): void
+interface "Order" as OrderInterface {
+  +getCost(): decimal
+  +getDescription(): string
+  +calculateDeliveryTime(): int
 }
 
-class "DeliveryOrder" as DO {
-  +deliveryAddress: string
-  +estimatedTime: int
-  +courierId: int
-  +calculateTotal(): decimal
+class "BasicOrder" as Basic {
+  -items: List<MenuItem>
+  -baseAddress: string
+  -customerId: int
+  +getCost(): decimal
+  +getDescription(): string
+  +calculateDeliveryTime(): int
 }
 
-class "PickupOrder" as PO {
-  +pickupLocation: string
-  +pickupTime: DateTime
-  +calculateTotal(): decimal
-}
-
-abstract class "OrderDecorator" as OD {
+abstract class "OrderDecorator" as Decorator {
   #wrappedOrder: Order
-  +calculateTotal(): decimal
-  +cancel(): void
+  +getCost(): decimal
   +getDescription(): string
+  +calculateDeliveryTime(): int
 }
 
-class "PriorityOrderDecorator" as POD {
+class "UrgentDeliveryDecorator" as Urgent {
+  -urgentFee: decimal
   -priorityLevel: int
-  -extraFee: decimal
-  +calculateTotal(): decimal
-  +isPriority(): boolean
+  +getCost(): decimal
   +getDescription(): string
+  +calculateDeliveryTime(): int
+  -prioritizeInQueue(): void
 }
 
-class "PromoOrderDecorator" as PROMOD {
-  -promoCode: string
-  -discountPercent: int
-  +calculateTotal(): decimal
-  +applyDiscount(): decimal
+class "GiftPackagingDecorator" as Gift {
+  -packagingFee: decimal
+  -giftMessage: string
+  +getCost(): decimal
   +getDescription(): string
+  +wrapGift(): void
 }
 
-Order <|-- DO
-Order <|-- PO
+class "TemperatureControlDecorator" as Temp {
+  -tempFee: decimal
+  -tempType: string
+  +getCost(): decimal
+  +getDescription(): string
+  +maintainTemperature(): void
+}
 
-OD o-- Order : decorates
-OD <|-- POD
-OD <|-- PROMOD
+OrderInterface <|-- Basic
+OrderInterface <|-- Decorator
 
-note right of OD
-  Абстрактный декоратор
-  Хранит ссылку на Order
-  и делегирует вызовы
+Decorator o-- OrderInterface : wraps/delegates
+
+Decorator <|-- Urgent
+Decorator <|-- Gift
+Decorator <|-- Temp
+
+note right of Basic
+  Базовый заказ
+  Только еда и стандартная доставка
 end note
 
-note right of POD
-  Добавляет приоритет
-  Дополнительная плата
-  Ускоренная доставка
+note right of Urgent
+  Добавляет поведение:
+  - Срочность
+  - Приоритет курьеру
+  - Доплата за скорость
 end note
 
-note right of PROMOD
-  Добавляет промокоды
-  Скидки от суммы
-  Ограничения по времени
+note right of Gift
+  Добавляет поведение:
+  - Упаковка
+  - Открытка
+  - Доплата за упаковку
+end note
+
+note right of Temp
+  Добавляет поведение:
+  - Термоупаковка
+  - Поддержание температуры
+  - Доплата за термо
+end note
+
+note bottom of Decorator
+  Ключевая идея:
+  Мы не создаем классы вида
+  "UrgentGiftTempOrder".
+  Мы динамически оборачиваем
+  BasicOrder нужными декораторами.
 end note
 
 @enduml
